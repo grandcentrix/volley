@@ -16,6 +16,7 @@
 
 package com.android.volley;
 
+import android.annotation.TargetApi;
 import android.net.TrafficStats;
 import android.os.Build;
 import android.os.Process;
@@ -30,6 +31,7 @@ import java.util.concurrent.BlockingQueue;
  * eligible, using a specified {@link Cache} interface. Valid responses and
  * errors are posted back to the caller via a {@link ResponseDelivery}.
  */
+@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 @SuppressWarnings("rawtypes")
 public class NetworkDispatcher extends Thread {
     /** The queue of requests to service. */
@@ -104,6 +106,11 @@ public class NetworkDispatcher extends Thread {
                 // Perform the network request.
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
                 request.addMarker("network-http-complete");
+                
+                // simply set a flag if the request return new data
+                if(networkResponse.notModified){
+                	request.newVersion(false);
+                }
 
                 // If the server returned 304 AND we delivered a response already,
                 // we're done -- don't deliver a second identical response.
