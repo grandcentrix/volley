@@ -15,22 +15,27 @@
  */
 package com.android.volley.toolbox;
 
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader.ImageContainer;
+import com.android.volley.toolbox.ImageLoader.ImageListener;
+
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader.ImageContainer;
-import com.android.volley.toolbox.ImageLoader.ImageListener;
-
 /**
- * Handles fetching an image from a URL as well as the life-cycle of the
- * associated request.
+ * Handles fetching an image from a URL as well as the life-cycle of the associated request.
  */
 public class NetworkImageView extends ImageView {
-    /** The URL of the network image to load */
+
+    /**
+     * The URL of the network image to load
+     */
     private String mUrl;
 
     /**
@@ -43,11 +48,32 @@ public class NetworkImageView extends ImageView {
      */
     private int mErrorImageId;
 
-    /** Local copy of the ImageLoader. */
+    /**
+     * Local copy of the ImageLoader.
+     */
     private ImageLoader mImageLoader;
 
-    /** Current ImageContainer. (either in-flight or finished) */
+    /**
+     * Current ImageContainer. (either in-flight or finished)
+     */
     private ImageContainer mImageContainer;
+
+    /**
+     * Should fade in or not.
+     */
+    private boolean mFadeInBitmap = true;
+
+    /**
+     * Res id of the bitmap to start the fade in from
+     */
+    private int mFadeStartBitmapId;
+
+    /**
+     * Duration for the fade in in ms
+     *
+     * 300 ms is default {@see http://developer.android.com/reference/android/animation/ValueAnimator.html}
+     */
+    private int mFadeInDuration = 300;
 
     public NetworkImageView(Context context) {
         this(context, null);
@@ -66,11 +92,10 @@ public class NetworkImageView extends ImageView {
      * immediately either set the cached image (if available) or the default image specified by
      * {@link NetworkImageView#setDefaultImageResId(int)} on the view.
      *
-     * NOTE: If applicable, {@link NetworkImageView#setDefaultImageResId(int)} and
-     * {@link NetworkImageView#setErrorImageResId(int)} should be called prior to calling
-     * this function.
+     * NOTE: If applicable, {@link NetworkImageView#setDefaultImageResId(int)} and {@link
+     * NetworkImageView#setErrorImageResId(int)} should be called prior to calling this function.
      *
-     * @param url The URL that should be loaded into this ImageView.
+     * @param url         The URL that should be loaded into this ImageView.
      * @param imageLoader ImageLoader that will be used to make the request.
      */
     public void setImageUrl(String url, ImageLoader imageLoader) {
@@ -97,7 +122,62 @@ public class NetworkImageView extends ImageView {
     }
 
     /**
+     * Returns the animation duration for the fade in
+     *
+     * @return fade in duration in ms
+     */
+    public int getFadeInDuration() {
+        return mFadeInDuration;
+    }
+
+    /**
+     * Sets the animation duration for the fading in animation
+     *
+     * @param fadeInDuration time in ms
+     */
+    public void setFadeInDuration(int fadeInDuration) {
+        mFadeInDuration = fadeInDuration;
+    }
+
+    /**
+     * Returns the image id for the image to fade in from
+     *
+     * @return id the for start image
+     */
+    public int getFadeStartBitmapId() {
+        return mFadeStartBitmapId;
+    }
+
+    /**
+     * Sets the image id for the image to start fading in from
+     *
+     * @param fadeStartBitmapId id the start image
+     */
+    public void setFadeStartBitmapId(int fadeStartBitmapId) {
+        mFadeStartBitmapId = fadeStartBitmapId;
+    }
+
+    /**
+     * Returns the fade in mode. (true - enabled, false - disabled)
+     *
+     * @return true if image will fade in, false if not
+     */
+    public boolean isFadeInBitmap() {
+        return mFadeInBitmap;
+    }
+
+    /**
+     * Sets the fade in mode to enabled (true) or disabled (false).
+     *
+     * @param fadeInBitmap true for fading in, false for disabling fading it
+     */
+    public void setFadeInBitmap(boolean fadeInBitmap) {
+        mFadeInBitmap = fadeInBitmap;
+    }
+
+    /**
      * Loads the image for the view if it isn't already loaded.
+     *
      * @param isInLayoutPass True if this was invoked from a layout pass, false otherwise.
      */
     private void loadImageIfNecessary(final boolean isInLayoutPass) {
@@ -164,22 +244,33 @@ public class NetworkImageView extends ImageView {
                         }
 
                         if (response.getBitmap() != null) {
-                            setImageBitmap(response.getBitmap());
+                            if (mFadeInBitmap && mFadeStartBitmapId != 0) {
+                                // Use TransitionDrawable to fade in
+                                final TransitionDrawable transitionDrawable
+                                        = new TransitionDrawable(new Drawable[]{
+                                        getContext().getResources().getDrawable(mFadeStartBitmapId),
+                                        new BitmapDrawable(getContext().getResources(),
+                                                response.getBitmap())});
+                                setImageDrawable(transitionDrawable);
+                                transitionDrawable.startTransition(mFadeInDuration);
+                            } else {
+                                setImageBitmap(response.getBitmap());
+                            }
                         } else if (mDefaultImageId != 0) {
                             setImageResource(mDefaultImageId);
                         }
                     }
-                });
+                }
+        );
 
         // update the ImageContainer to be the new bitmap container.
         mImageContainer = newContainer;
     }
 
     private void setDefaultImageOrNull() {
-        if(mDefaultImageId != 0) {
+        if (mDefaultImageId != 0) {
             setImageResource(mDefaultImageId);
-        }
-        else {
+        } else {
             setImageBitmap(null);
         }
     }
@@ -187,7 +278,9 @@ public class NetworkImageView extends ImageView {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        loadImageIfNecessary(true);
+        if (changed) {
+            loadImageIfNecessary(true);
+        }
     }
 
     @Override
