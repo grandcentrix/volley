@@ -21,6 +21,7 @@ import com.android.volley.toolbox.ImageLoader.ImageListener;
 
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.text.TextUtils;
@@ -61,7 +62,7 @@ public class NetworkImageView extends ImageView {
     /**
      * Should fade in or not.
      */
-    private boolean mFadeInBitmap = true;
+    private boolean mFadeInEnabled;
 
     /**
      * Res id of the bitmap to start the fade in from
@@ -162,17 +163,17 @@ public class NetworkImageView extends ImageView {
      *
      * @return true if image will fade in, false if not
      */
-    public boolean isFadeInBitmap() {
-        return mFadeInBitmap;
+    public boolean isFadeInEnabled() {
+        return mFadeInEnabled;
     }
 
     /**
      * Sets the fade in mode to enabled (true) or disabled (false).
      *
-     * @param fadeInBitmap true for fading in, false for disabling fading it
+     * @param enabled true for fading in, false for disabling fading it
      */
-    public void setFadeInBitmap(boolean fadeInBitmap) {
-        mFadeInBitmap = fadeInBitmap;
+    public void setFadeInEnabled(boolean enabled) {
+        mFadeInEnabled = enabled;
     }
 
     /**
@@ -244,11 +245,17 @@ public class NetworkImageView extends ImageView {
                         }
 
                         if (response.getBitmap() != null) {
-                            if (mFadeInBitmap && mFadeStartBitmapId != 0) {
+                            Drawable fadeStartDrawable;
+                            if (mFadeStartBitmapId != 0) {
+                                fadeStartDrawable = getContext().getResources()
+                                        .getDrawable(mFadeStartBitmapId);
+                            } else {
+                                fadeStartDrawable = new ColorDrawable(android.R.color.transparent);
+                            }
+                            if (mFadeInEnabled) {
                                 // Use TransitionDrawable to fade in
                                 final TransitionDrawable transitionDrawable
-                                        = new TransitionDrawable(new Drawable[]{
-                                        getContext().getResources().getDrawable(mFadeStartBitmapId),
+                                        = new TransitionDrawable(new Drawable[]{fadeStartDrawable,
                                         new BitmapDrawable(getContext().getResources(),
                                                 response.getBitmap())});
                                 setImageDrawable(transitionDrawable);
