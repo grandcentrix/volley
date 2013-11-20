@@ -38,8 +38,8 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
      * @param listener Listener to receive the JSON response
      * @param errorListener Error listener, or null to ignore errors.
      */
-    public JsonArrayRequest(String url, Listener<JSONArray> listener, ErrorListener errorListener) {
-        super(Method.GET, url, null, listener, errorListener);
+    public JsonArrayRequest(String url, ErrorListener errorListener) {
+        super(Method.GET, url, null,  errorListener);
     }
 
     @Override

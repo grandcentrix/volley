@@ -102,6 +102,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /** An opaque token tagging this request; used for bulk cancellation. */
     private Object mTag;
 
+    /** Indicates if this Request consists of new data from the server, or old ones from the cache **/	
+    private boolean mNewVersion = true;
+
     /**
      * Creates a new request with the given URL and error listener.  Note that
      * the normal response listener is not provided here as delivery of responses
@@ -540,4 +543,15 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         return (mCanceled ? "[X] " : "[ ] ") + getUrl() + " " + trafficStatsTag + " "
                 + getPriority() + " " + mSequence;
     }
+
+	/**
+	 * @param isNew
+	 */
+	public void newVersion(boolean isNew) {
+		mNewVersion  = isNew;
+	}
+	
+	public boolean isNew(){
+		return mNewVersion;
+	}
 }

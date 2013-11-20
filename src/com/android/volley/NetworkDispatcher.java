@@ -104,6 +104,11 @@ public class NetworkDispatcher extends Thread {
                 // Perform the network request.
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
                 request.addMarker("network-http-complete");
+                
+                // simply set a flag if the request return new data
+                if(networkResponse.notModified){
+                	request.newVersion(false);
+                }
 
                 // If the server returned 304 AND we delivered a response already,
                 // we're done -- don't deliver a second identical response.

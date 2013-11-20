@@ -39,7 +39,7 @@ public abstract class JsonRequest<T> extends Request<T> {
     private static final String PROTOCOL_CONTENT_TYPE =
         String.format("application/json; charset=%s", PROTOCOL_CHARSET);
 
-    private final Listener<T> mListener;
+    private Listener<T> mListener;
     private final String mRequestBody;
 
     /**
@@ -48,21 +48,22 @@ public abstract class JsonRequest<T> extends Request<T> {
      *
      * @deprecated Use {@link #JsonRequest(int, String, String, Listener, ErrorListener)}.
      */
-    public JsonRequest(String url, String requestBody, Listener<T> listener,
+    public JsonRequest(String url, String requestBody,
             ErrorListener errorListener) {
-        this(Method.DEPRECATED_GET_OR_POST, url, requestBody, listener, errorListener);
+        this(Method.DEPRECATED_GET_OR_POST, url, requestBody, errorListener);
     }
 
-    public JsonRequest(int method, String url, String requestBody, Listener<T> listener,
+    public JsonRequest(int method, String url, String requestBody,
             ErrorListener errorListener) {
         super(method, url, errorListener);
-        mListener = listener;
         mRequestBody = requestBody;
     }
+    
+    
 
     @Override
     protected void deliverResponse(T response) {
-        mListener.onResponse(response);
+        getResponseListener().onResponse(response);
     }
 
     @Override
@@ -99,4 +100,12 @@ public abstract class JsonRequest<T> extends Request<T> {
             return null;
         }
     }
+
+	public Listener<T> getResponseListener() {
+		return mListener;
+	}
+
+	public void setResponseListener(Listener<T> listener) {
+		mListener = listener;
+	}
 }
