@@ -18,6 +18,7 @@ package com.android.volley.toolbox;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader.ImageContainer;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
+import com.android.volley.Request;
 
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
@@ -33,6 +34,8 @@ import android.widget.ImageView;
  * Handles fetching an image from a URL as well as the life-cycle of the associated request.
  */
 public class NetworkImageView extends ImageView {
+
+    private Request.Priority mPriority = Request.Priority.LOW;
 
     /**
      * The URL of the network image to load
@@ -219,7 +222,7 @@ public class NetworkImageView extends ImageView {
 
         // The pre-existing content of this view didn't match the current URL. Load the new image
         // from the network.
-        ImageContainer newContainer = mImageLoader.get(mUrl,
+        ImageContainer newContainer = mImageLoader.get(mUrl, mPriority,
                 new ImageListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
@@ -307,5 +310,13 @@ public class NetworkImageView extends ImageView {
     protected void drawableStateChanged() {
         super.drawableStateChanged();
         invalidate();
+    }
+
+    public void setPriority(final Request.Priority priority) {
+        mPriority = priority;
+    }
+
+    public Request.Priority getPriority() {
+        return mPriority;
     }
 }

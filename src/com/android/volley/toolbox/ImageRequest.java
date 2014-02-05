@@ -45,6 +45,7 @@ public class ImageRequest extends Request<Bitmap> {
     private final Config mDecodeConfig;
     private final int mMaxWidth;
     private final int mMaxHeight;
+    private Priority mPriority = Priority.LOW;
 
     /** Decoding lock so that we don't decode more than one image at a time (to avoid OOM's) */
     private static final Object sDecodeLock = new Object();
@@ -79,7 +80,11 @@ public class ImageRequest extends Request<Bitmap> {
 
     @Override
     public Priority getPriority() {
-        return Priority.LOW;
+        return mPriority;
+    }
+
+    public void setPriority(Priority priority){
+        mPriority = priority;
     }
 
     /**

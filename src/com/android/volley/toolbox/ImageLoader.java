@@ -26,7 +26,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageRequest;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -167,8 +166,12 @@ public class ImageLoader {
      * @param requestUrl The URL of the image to be loaded.
      * @param defaultImage Optional default image to return until the actual image is loaded.
      */
+    public ImageContainer get(String requestUrl, final Request.Priority priority, final ImageListener listener) {
+        return get(requestUrl, priority, listener, 0, 0);
+    }
+
     public ImageContainer get(String requestUrl, final ImageListener listener) {
-        return get(requestUrl, listener, 0, 0);
+        return get(requestUrl, Request.Priority.LOW, listener, 0, 0);
     }
 
     /**
@@ -176,14 +179,16 @@ public class ImageLoader {
      * in the cache, and returns a bitmap container that contains all of the data
      * relating to the request (as well as the default image if the requested
      * image is not available).
+     *
      * @param requestUrl The url of the remote image
      * @param imageListener The listener to call when the remote image is loaded
      * @param maxWidth The maximum width of the returned image.
      * @param maxHeight The maximum height of the returned image.
+     * @param priority
      * @return A container object that contains all of the properties of the request, as well as
      *     the currently available image (default if remote is not loaded).
      */
-    public ImageContainer get(String requestUrl, ImageListener imageListener,
+    public ImageContainer get(String requestUrl, final Request.Priority priority, ImageListener imageListener,
             int maxWidth, int maxHeight) {
         // only fulfill requests that were initiated from the main thread.
         throwIfNotOnMainThread();
@@ -216,7 +221,7 @@ public class ImageLoader {
 
         // The request is not already in flight. Send the new request to the network and
         // track it.
-        Request<?> newRequest =
+        ImageRequest newRequest =
             new ImageRequest(requestUrl, new Listener<Bitmap>() {
                 @Override
                 public void onResponse(Bitmap response) {
@@ -229,7 +234,7 @@ public class ImageLoader {
                     onGetImageError(cacheKey, error);
                 }
             });
-
+        newRequest.setPriority(priority);
         mRequestQueue.add(newRequest);
         mInFlightRequests.put(cacheKey,
                 new BatchedImageRequest(newRequest, imageContainer));
