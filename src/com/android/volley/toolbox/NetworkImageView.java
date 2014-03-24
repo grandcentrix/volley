@@ -185,6 +185,11 @@ public class NetworkImageView extends ImageView {
      * @param isInLayoutPass True if this was invoked from a layout pass, false otherwise.
      */
     private void loadImageIfNecessary(final boolean isInLayoutPass) {
+        
+          if (Looper.myLooper() == null || !Looper.myLooper().equals(Looper.getMainLooper())) {
+            return;
+        }
+
         int width = getWidth();
         int height = getHeight();
 
