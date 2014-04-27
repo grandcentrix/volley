@@ -97,10 +97,11 @@ public class NetworkImageView extends ImageView {
      * immediately either set the cached image (if available) or the default image specified by
      * {@link NetworkImageView#setDefaultImageResId(int)} on the view.
      *
-     * NOTE: If applicable, {@link NetworkImageView#setDefaultImageResId(int)} and {@link
-     * NetworkImageView#setErrorImageResId(int)} should be called prior to calling this function.
+     * NOTE: If applicable, {@link NetworkImageView#setDefaultImageResId(int)} and
+     * {@link NetworkImageView#setErrorImageResId(int)} should be called prior to calling
+     * this function.
      *
-     * @param url         The URL that should be loaded into this ImageView.
+     * @param url The URL that should be loaded into this ImageView.
      * @param imageLoader ImageLoader that will be used to make the request.
      */
     public void setImageUrl(String url, ImageLoader imageLoader) {
@@ -185,7 +186,7 @@ public class NetworkImageView extends ImageView {
      *
      * @param isInLayoutPass True if this was invoked from a layout pass, false otherwise.
      */
-    private void loadImageIfNecessary(final boolean isInLayoutPass) {
+    void loadImageIfNecessary(final boolean isInLayoutPass) {
         
           if (Looper.myLooper() == null || !Looper.myLooper().equals(Looper.getMainLooper())) {
             return;
@@ -194,11 +195,15 @@ public class NetworkImageView extends ImageView {
         int width = getWidth();
         int height = getHeight();
 
-        boolean isFullyWrapContent = getLayoutParams() != null
-                && getLayoutParams().height == LayoutParams.WRAP_CONTENT
-                && getLayoutParams().width == LayoutParams.WRAP_CONTENT;
+        boolean wrapWidth = false, wrapHeight = false;
+        if (getLayoutParams() != null) {
+            wrapWidth = getLayoutParams().width == LayoutParams.WRAP_CONTENT;
+            wrapHeight = getLayoutParams().height == LayoutParams.WRAP_CONTENT;
+        }
+
         // if the view's bounds aren't known yet, and this is not a wrap-content/wrap-content
         // view, hold off on loading the image.
+        boolean isFullyWrapContent = wrapWidth && wrapHeight;
         if (width == 0 && height == 0 && !isFullyWrapContent) {
             return;
         }
@@ -225,6 +230,10 @@ public class NetworkImageView extends ImageView {
                 setDefaultImageOrNull();
             }
         }
+
+        // Calculate the max image width / height to use while ignoring WRAP_CONTENT dimens.
+        int maxWidth = wrapWidth ? 0 : width;
+        int maxHeight = wrapHeight ? 0 : height;
 
         // The pre-existing content of this view didn't match the current URL. Load the new image
         // from the network.
@@ -276,7 +285,7 @@ public class NetworkImageView extends ImageView {
                             setImageResource(mDefaultImageId);
                         }
                     }
-                }
+                }, maxWidth, maxHeight);
         );
 
         // update the ImageContainer to be the new bitmap container.
