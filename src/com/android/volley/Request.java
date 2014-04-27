@@ -213,7 +213,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
                     @Override
                     public void run() {
                         mEventLog.add(tag, threadId);
-                        mEventLog.finish(this.toString());
+                        mEventLog.finish(((Object)this).toString());
                     }
                 });
                 return;
