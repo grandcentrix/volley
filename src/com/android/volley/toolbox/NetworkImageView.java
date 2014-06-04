@@ -252,11 +252,11 @@ public class NetworkImageView extends ImageView {
                         // pass do not set the image immediately as it will trigger a requestLayout
                         // inside of a layout. Instead, defer setting the image by posting back to
                         // the main thread.
-                        if (isImmediate && isInLayoutPass) {
+                        if (Looper.myLooper() == null || !Looper.myLooper().equals(Looper.getMainLooper())) {
                             post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    onResponse(response, false);
+                                    onResponse(response, true);
                                 }
                             });
                             return;
@@ -270,7 +270,8 @@ public class NetworkImageView extends ImageView {
                             } else {
                                 fadeStartDrawable = new ColorDrawable(android.R.color.transparent);
                             }
-                            if (mFadeInEnabled) {
+
+                            if (mFadeInEnabled && !isImmediate) {
                                 // Use TransitionDrawable to fade in
                                 final TransitionDrawable transitionDrawable
                                         = new TransitionDrawable(new Drawable[]{fadeStartDrawable,
