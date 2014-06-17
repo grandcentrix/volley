@@ -55,6 +55,9 @@ public class HttpHeaderParser {
             serverDate = parseDateAsEpoch(headerValue);
         }
 
+
+        serverEtag = headers.get("ETag");
+
         headerValue = headers.get("Cache-Control");
         if (headerValue != null) {
             hasCacheControl = true;
@@ -62,7 +65,9 @@ public class HttpHeaderParser {
             for (int i = 0; i < tokens.length; i++) {
                 String token = tokens[i].trim();
                 if (token.equals("no-cache") || token.equals("no-store")) {
-                    return null;
+                    if (serverEtag == null) {
+                        return null;
+                    }
                 } else if (token.startsWith("max-age=")) {
                     try {
                         maxAge = Long.parseLong(token.substring(8));
@@ -79,7 +84,6 @@ public class HttpHeaderParser {
             serverExpires = parseDateAsEpoch(headerValue);
         }
 
-        serverEtag = headers.get("ETag");
 
         // Cache-Control takes precedence over an Expires header, even if both exist and Expires
         // is more restrictive.
