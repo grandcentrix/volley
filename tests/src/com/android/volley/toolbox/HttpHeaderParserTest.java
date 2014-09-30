@@ -21,12 +21,15 @@ import com.android.volley.NetworkResponse;
 
 import junit.framework.TestCase;
 
+import org.apache.http.impl.cookie.DateUtils;
+
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @SmallTest
@@ -176,7 +179,7 @@ public class HttpHeaderParserTest extends TestCase {
     }
 
     private static String rfc1123Date(long millis) {
-        DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+        DateFormat df = new SimpleDateFormat(DateUtils.PATTERN_RFC1123, Locale.US);
         return df.format(new Date(millis));
     }
 
