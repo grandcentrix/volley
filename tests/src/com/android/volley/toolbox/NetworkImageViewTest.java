@@ -1,6 +1,11 @@
 package com.android.volley.toolbox;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+
+import android.graphics.Bitmap;
 import android.test.InstrumentationTestCase;
+import android.test.UiThreadTest;
 import android.view.ViewGroup.LayoutParams;
 
 public class NetworkImageViewTest extends InstrumentationTestCase {
@@ -14,6 +19,7 @@ public class NetworkImageViewTest extends InstrumentationTestCase {
         mNIV = new NetworkImageView(getInstrumentation().getContext());
     }
 
+    @UiThreadTest
     public void testSetImageUrl_requestsImage() {
         mNIV.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         mNIV.setImageUrl("http://foo", mMockImageLoader);
@@ -36,8 +42,9 @@ public class NetworkImageViewTest extends InstrumentationTestCase {
         public int lastMaxWidth;
         public int lastMaxHeight;
 
-        public ImageContainer get(String requestUrl, ImageListener imageListener, int maxWidth,
-                int maxHeight) {
+        @Override
+        public ImageContainer get(final String requestUrl, final Request.Priority priority,
+                final ImageListener imageListener, final int maxWidth, final int maxHeight) {
             lastRequestUrl = requestUrl;
             lastMaxWidth = maxWidth;
             lastMaxHeight = maxHeight;
