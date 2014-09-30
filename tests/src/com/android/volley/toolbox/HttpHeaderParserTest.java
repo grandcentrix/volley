@@ -158,7 +158,7 @@ public class HttpHeaderParserTest extends TestCase {
 
     private void assertEqualsWithin(long expected, long value, long fudgeFactor) {
         long diff = Math.abs(expected - value);
-        assertTrue(diff < fudgeFactor);
+        assertTrue("should be within " + fudgeFactor + " but is " + diff, diff < fudgeFactor);
     }
 
     private static String rfc1123Date(long millis) {
