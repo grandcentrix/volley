@@ -163,6 +163,16 @@ public class HttpHeaderParserTest extends TestCase {
         assertTrue(message, diff < fudgeFactor);
     }
 
+    public void testRFC1123Date() throws Exception {
+        final long now = System.currentTimeMillis();
+        assertTrue(now > 0);
+        final String dateString = rfc1123Date(now);
+        assertNotNull(dateString);
+        final long parsedNow = HttpHeaderParser.parseDateAsEpoch(dateString);
+        // don't care about milliseconds
+        assertEqualsWithin(now, parsedNow, 1000);
+    }
+
     private static String rfc1123Date(long millis) {
         DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
         return df.format(new Date(millis));
