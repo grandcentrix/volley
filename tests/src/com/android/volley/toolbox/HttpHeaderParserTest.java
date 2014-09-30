@@ -169,6 +169,8 @@ public class HttpHeaderParserTest extends TestCase {
         final String dateString = rfc1123Date(now);
         assertNotNull(dateString);
         final long parsedNow = HttpHeaderParser.parseDateAsEpoch(dateString);
+
+        assertTrue("couldn't parse Date " + dateString, parsedNow > 0);
         // don't care about milliseconds
         assertEqualsWithin(now, parsedNow, 1000);
     }
