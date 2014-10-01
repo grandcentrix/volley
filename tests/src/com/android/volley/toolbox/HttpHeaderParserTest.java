@@ -16,18 +16,21 @@
 
 package com.android.volley.toolbox;
 
-import android.test.suitebuilder.annotation.SmallTest;
-
 import com.android.volley.Cache;
 import com.android.volley.NetworkResponse;
+
+import junit.framework.TestCase;
+
+import org.apache.http.impl.cookie.DateUtils;
+
+import android.test.suitebuilder.annotation.SmallTest;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
-
-import junit.framework.TestCase;
 
 @SmallTest
 public class HttpHeaderParserTest extends TestCase {
@@ -76,7 +79,7 @@ public class HttpHeaderParserTest extends TestCase {
     }
 
     public void testParseCacheHeaders_normalExpire() {
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         headers.put("Date", rfc1123Date(now));
         headers.put("Expires", rfc1123Date(now + ONE_HOUR_MILLIS));
 
@@ -90,7 +93,7 @@ public class HttpHeaderParserTest extends TestCase {
     }
 
     public void testParseCacheHeaders_expiresInPast() {
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         headers.put("Date", rfc1123Date(now));
         headers.put("Expires", rfc1123Date(now - ONE_HOUR_MILLIS));
 
@@ -105,7 +108,7 @@ public class HttpHeaderParserTest extends TestCase {
 
     public void testParseCacheHeaders_serverRelative() {
 
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         // Set "current" date as one hour in the future
         headers.put("Date", rfc1123Date(now + ONE_HOUR_MILLIS));
         // TTL four hours in the future, so should be three hours from now
@@ -158,11 +161,25 @@ public class HttpHeaderParserTest extends TestCase {
 
     private void assertEqualsWithin(long expected, long value, long fudgeFactor) {
         long diff = Math.abs(expected - value);
-        assertTrue(diff < fudgeFactor);
+        final String message = "expected: " + expected + " value: " + value
+                + " diff (" + diff + ") is not in fudgeFactor: " + fudgeFactor;
+        assertTrue(message, diff < fudgeFactor);
+    }
+
+    public void testRFC1123Date() throws Exception {
+        final long now = System.currentTimeMillis();
+        assertTrue(now > 0);
+        final String dateString = rfc1123Date(now);
+        assertNotNull(dateString);
+        final long parsedNow = HttpHeaderParser.parseDateAsEpoch(dateString);
+
+        assertTrue("couldn't parse Date " + dateString, parsedNow > 0);
+        // don't care about milliseconds
+        assertEqualsWithin(now, parsedNow, 1000);
     }
 
     private static String rfc1123Date(long millis) {
-        DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+        DateFormat df = new SimpleDateFormat(DateUtils.PATTERN_RFC1123, Locale.US);
         return df.format(new Date(millis));
     }
 
