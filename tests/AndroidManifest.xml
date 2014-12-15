@@ -20,8 +20,4 @@
 
     <uses-sdk android:minSdkVersion="8" />
 
-    <application>
-        <uses-library android:name="android.test.runner" />
-    </application>
-
 </manifest>
