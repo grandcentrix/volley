@@ -199,7 +199,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      *
      * <p>Also dumps all events from this request's event log; for debugging.</p>
      */
-    void finish(final String tag) {
+    public void finish(final String tag) {
         if (mRequestQueue != null) {
             mRequestQueue.finish(this);
         }
