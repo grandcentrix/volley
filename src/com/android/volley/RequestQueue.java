@@ -124,6 +124,10 @@ public class RequestQueue {
         this(cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE);
     }
 
+    public int getWaitingRequestsCount() {
+        return mWaitingRequests.size();
+    }
+
     /**
      * Starts the dispatchers in this queue.
      */
